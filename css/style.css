@@ -1,0 +1,73 @@
+:root {
+
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: rgb(250, 250, 250);
+}
+
+/* Header / navigation styling */
+.navigation {
+    background-color: var(--bs-white);
+    z-index: 2;
+    border-bottom: 1px solid #dbdbdb;
+}
+
+.link-menu {
+    color: #000000;
+}
+
+.navbar-profile-photo {
+    width: 1.5em;
+    height: 1.5em;
+    position: relative;
+}
+
+.search .fa-search {
+    top: 10px;
+    right: 10px;
+}
+
+.search input:active, .search input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Card style */
+.card {
+    width: 600px;
+    border-radius: 5px;
+    border: 1px solid rgba(0,0,0,.125);
+    margin-bottom: 60px;
+}
+
+.card-header {
+    padding: 20px;
+    background-color: var(--bs-white);
+}
+
+.avatar {
+    vertical-align: middle;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.avatar-body {
+    width: 20px;
+    height: 20px;
+}
+
+.post-image {
+    display: block;
+    width: 100%;
+    object-fit: contain;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
