@@ -70,9 +70,7 @@
                 </div>
 
                 <!-- User info -->
-                <h5 class="text-center pb-3 pt-3 welcome-text-secondary">
-                    Gebruikerinformatie
-                </h5>
+                <h5 class="text-center pb-3 pt-3 welcome-text-secondary">Gebruikerinformatie</h5>
                 <div class="space-line-horizontal line"></div>
                 <div class="d-flex flex-row">
                     <div class="p-2">

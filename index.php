@@ -14,6 +14,14 @@
 </head>
 <body>
 
+    <!--
+
+    Voor elke gebruiker een eigen directory aanmaken bij registeren
+
+    Darkmode en color style opslaan in localStorages
+
+    -->
+
     <header>
         <nav class="navbar navbar-expand-lg navbar-light navigation">
             <div class="container justify-content-center">
@@ -73,7 +81,7 @@
 
                             <!-- Profile -->
                             <li class="list-inline-item ml-2 align-middle">
-                                <a href="#" class="link-menu">
+                                <a href="user/profile.php" class="link-menu">
                                     <div class="rounded-circle overflow-hidden d-flex justify-content-center align-items-center border navbar-profile-photo">
                                         <img src="images/avatar.png" alt="Avatar" style="transform: scale(1.5); width: 100%; position: absolute; left: 0;">
                                     </div>
@@ -89,6 +97,7 @@
 
     <main>
         <section>
+
             <div class="container">
 
                 <div class="row">
@@ -110,7 +119,7 @@
                                     <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
                                     <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
                                 </div>
-                                <div class="card-footer bg-transparent border-success">
+                                <div class="card-footer bg-transparent">
                                     <a href="#" class="btn btn-primary">Add comment</a>
                                 </div>
                             </article>

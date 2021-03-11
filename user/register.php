@@ -1,3 +1,8 @@
+<?php
+
+
+?>
+
 <!DOCTYPE HTML>
 <html lang="nl">
 <head>
@@ -21,7 +26,7 @@
 
                     <div class="col">
 
-                        <form action="" method="POST">
+                        <form action="process.php" method="POST">
 
                             <div class="row">
 
@@ -48,21 +53,26 @@
                                 <input type="password" class="form-control" id="password" name="password" placeholder="name@example.com">
                             </div>
 
+                            <div class="form-group">
+                                <label for="birthday">Geboortedatum</label>
+                                <input type="date" class="form-control" id="birthday" aria-describedby="birthday" name="birthday">
+                            </div>
+
                             <section>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="men" id="men" value="men">
+                                    <input class="form-check-input" type="radio" name="gender" id="men" value="men">
                                     <label class="form-check-label" for="men">
                                         Man
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="women" id="women" value="women">
+                                    <input class="form-check-input" type="radio" name="gender" id="women" value="women">
                                     <label class="form-check-label" for="women">
                                         Vrouw
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="different" id="different" value="different">
+                                    <input class="form-check-input" type="radio" name="gender" id="different" value="different">
                                     <label class="form-check-label" for="different">
                                         Anders
                                     </label>
@@ -77,7 +87,7 @@
                             </div>
 
                             <div class="form-group">
-                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <button type="submit" name="register-submit" class="btn btn-primary">Submit</button>
                             </div>
 
                         </form>
