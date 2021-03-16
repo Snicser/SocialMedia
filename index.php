@@ -16,11 +16,23 @@
 
     <!--
 
-    Voor elke gebruiker een eigen directory aanmaken bij registeren
-
     Darkmode en color style opslaan in localStorages
 
     -->
+
+    <div class="container">
+        <form action="user/upload.php" method="POST" enctype="multipart/form-data">
+            Select image to upload:
+            <input type="file" name="user-file" id="fileToUpload">
+
+            <div class="form-floating">
+                <textarea class="form-control" name="caption" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"></textarea>
+                <label for="floatingTextarea2">Comments</label>
+            </div>
+
+            <button type="submit" name="post-message">Post</button>
+        </form>
+    </div>
 
     <header>
         <nav class="navbar navbar-expand-lg navbar-light navigation">
@@ -187,6 +199,15 @@
 
             </div>
         </section>
+
+<!--        <section class="sticky-top upload-file">-->
+<!--            <form method="POST">-->
+<!--                <div class="mb-3">-->
+<!--                    <label for="formFile" class="form-label">Default file input example</label>-->
+<!--                    <input class="form-control" type="file" id="formFile">-->
+<!--                </div>-->
+<!--            </form>-->
+<!--        </section>-->
     </main>
 
 </body>

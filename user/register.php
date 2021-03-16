@@ -1,6 +1,17 @@
 <?php
 
+require_once ('../Utils/Constants.php');
 
+if (isset($_GET['register'])) {
+
+    // Maybe switch statement??
+    echo match ($_GET['register']) {
+        Constants::REGISTER_FAILED => 'Er ging iets fout!',
+        Constants::REGISTER_FAILED_EMAIL => 'Geen geldig email!',
+        Constants::REGISTER_FAILED_SERVER_ERROR => 'Er ging iets fout bij onze servers!',
+        default => 'Er is een onbekende fout opgetrenden, neem contact op met de beheerder!',
+    };
+}
 ?>
 
 <!DOCTYPE HTML>
@@ -23,13 +34,11 @@
             <div class="container">
 
                 <div class="row">
-
                     <div class="col">
 
-                        <form action="process.php" method="POST">
+                        <form action="process.php" method="POST" accept-charset="UTF-8">
 
                             <div class="row">
-
                                 <div class="col">
                                     <label for="first-name">Voornaam</label>
                                     <input type="text" class="form-control" id="first-name" name="first-name" placeholder="First name">
@@ -39,7 +48,6 @@
                                     <label for="last-name">Achternaam</label>
                                     <input type="text" class="form-control" id="last-name" name="last-name" placeholder="Last name">
                                 </div>
-
                             </div>
 
 
