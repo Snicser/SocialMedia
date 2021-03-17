@@ -42,7 +42,7 @@ if (isset($_POST['register-submit'])) {
     }
 
     // Hash password
-    $password = $password = hashPassword($password);
+    $password = hashPassword($password);
 
     // Add the user to the database
     if (!registerUser($connection, $firstName, $lastName, $email, $password, $birthday, $gender, 0)) {
@@ -52,7 +52,6 @@ if (isset($_POST['register-submit'])) {
     // Make directory and send the user to login page
     makeUserDirectory($firstName);
     header("Location: login.php?register=success", true, 303);
-
 }
 
 // Check if submit button is clicked for login
@@ -64,16 +63,16 @@ if (isset($_POST['login'])) {
         exit;
     } else {
 
-        $username = $_POST['username'];
+        $username = $_POST['username'] ?? "Undefined";
+        $password = $_POST['password'] ?? "Undefined";
+
 
         // Check user login
         if (checkUserPassword($connection, $password, $username)) {
             header("Location: ../index.php?login=success", true, 303);
-            exit;
         }
 
         header("Location: login.php?login=failed", true, 303);
-        exit;
     }
 }
 

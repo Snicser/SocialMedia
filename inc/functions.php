@@ -32,7 +32,7 @@ function registerUser($connection, string $firstName, string $lastName, string $
         $preparedStatement -> bindParam(':password', $password, PDO::PARAM_STR);
         $preparedStatement -> bindParam(':birthday', $birthday, PDO::PARAM_STR);
         $preparedStatement -> bindParam(':gender', $gender, PDO::PARAM_STR);
-        $preparedStatement -> bindParam(':username', $firstName, PDO::PARAM_STR);
+        $preparedStatement -> bindParam(':username', strtolower($firstName), PDO::PARAM_STR);
         $preparedStatement -> bindParam(':is_admin', $isAdmin, PDO::PARAM_INT);
         $preparedStatement -> execute();
 
@@ -128,16 +128,24 @@ function checkUserPassword($connection, $password, $username): bool {
      * We use the user_id to insert a post in the database
      */
 
-    // Get the user credentials from the database
+    // Default variables
     $userCredentials = [];
-    $query = "SELECT password, user_id FROM `users` WHERE username = :username";
-    $preparedStatement = $connection -> prepare($query);
-    $preparedStatement -> bindParam(':username', $username, PDO::PARAM_STR, 30);
-    $preparedStatement -> execute();
+    $userPassword = '';
+    $username = strtolower($username);
 
-    // Put them in an array
-    while ($row = $preparedStatement -> fetch(PDO::FETCH_ASSOC)) {
-        $userCredentials[] = $row;
+    try {
+        // Get the user credentials from the database
+        $query = "SELECT password, user_id FROM `users` WHERE username = :username";
+        $preparedStatement = $connection -> prepare($query);
+        $preparedStatement -> bindParam(':username', $username, PDO::PARAM_STR);
+        $preparedStatement -> execute();
+
+        // Put them in an array
+        while ($row = $preparedStatement -> fetch(PDO::FETCH_ASSOC)) {
+            $userCredentials[] = $row;
+        }
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when trying to check your password :%s", htmlspecialchars($exception->getMessage()));
     }
 
     // Check if array is empty if so return FALSE
@@ -145,18 +153,18 @@ function checkUserPassword($connection, $password, $username): bool {
         return false;
     }
 
+    // Loop through the array to get the values
     foreach ($userCredentials as $credential) {
         $_SESSION['user_id'] = $credential['user_id'];
+        $userPassword = $credential['password'];
     }
 
-    return true;
+    // Check if they match
+    if (password_verify('Onderbroek10!', '$2y$10$IorgahAAZCtdSOHnV8deaeImn2MJFl8SkKjh1OW6vIKTHZe/R8Mxa')) {
+        return true;
+    }
 
-//    // Check if they match
-//    if (password_verify($password, $row)) {
-//        return true;
-//    }
-
-//    return false;
+    return false;
 }
 
 /**

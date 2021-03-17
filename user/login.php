@@ -2,6 +2,8 @@
 
 require_once ('../Utils/Constants.php');
 
+// TODO: Document this stuff
+// Register URL
 if (isset($_GET['register'])) {
 
     // Maybe switch statement??
@@ -10,6 +12,18 @@ if (isset($_GET['register'])) {
         default => 'Er is een onbekende fout opgetrenden, neem contact op met de beheerder!',
     };
 }
+
+// Login URL
+if (isset($_GET['login'])) {
+
+    // Maybe switch statement??
+    echo match ($_GET['login']) {
+        Constants::LOGIN_FAILED => 'Verkeerde gebruikers naam of wachtwoord!',
+        default => 'Er is een onbekende fout opgetrenden, neem contact op met de beheerder!',
+    };
+}
+
+
 ?>
 
 <!DOCTYPE HTML>
