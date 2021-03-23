@@ -20,8 +20,14 @@ if (isset($_GET['userid'])) {
 // Get the userID of the current user
 $userId = $_SESSION['user_id'] ?? 0;
 
-// userMe -> current user
-// user_follower --> URL_USER_ID
+
+if (followUser($connection, $userId, $URL_USER_ID)) {
+    // User is following the other user
+    header("Location: ../index.php?follow=success", true, 303);
+} else {
+    // User is not following the other user
+    header("Location: ../index.php?follow=failed", true, 303);
+}
 
 
 

@@ -19,29 +19,24 @@ if (!$connection) {
 }
 
 
-// Get the username and check if exits
-$Username = $_SESSION['username'];
-$UserId = $_SESSION['user_id'];
-if (empty($Username) || empty($UserId)) {
-    header('Location: login.php', true, 303);
-    exit; // Make sure the code stops here
+header('Content-Type: image');
+if (isset($_GET['userid']) && isset($_GET['username']) && isset($_GET['image'])) {
+    readfile('../../../../../social-media-uploads/' . $_GET['username'] . '/' . $_GET['image'], true);
 }
 
 
-header('Content-Type: image/jpg; image/png; image/jpeg;');
-
-if (isset($_GET['userid'])) {
-    if ($_GET['userid'] == $UserId) {
-
-        $details = getProfileDetails($connection, $_GET['userid']);
-
-        $Username = $details[0]["username"];
-
-        readfile('../../../../../social-media-uploads/' . $Username . '/' . $_GET['image']);
-    }
-} else {
-    readfile('../../../../../social-media-uploads/' . $Username . '/' . $_GET['image']);
-}
+//if (isset($_GET['userid'])) {
+//    if ($_GET['userid'] == $UserId) {
+//
+//        $details = getProfileDetails($connection, $_GET['userid']);
+//
+//        $Username = $details[0]["username"];
+//
+//        readfile('../../../../../social-media-uploads/' . $Username . '/' . $_GET['image']);
+//    }
+//} else {
+//    readfile('../../../../../social-media-uploads/' . $Username . '/' . $_GET['image']);
+//}
 
 
 

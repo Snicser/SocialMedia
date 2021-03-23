@@ -25,6 +25,12 @@ if (isset($_GET['logout'])) {
     }
 }
 
+// TODO
+// Profile email adres veranderen
+// Fotos zien van mensen die jij volgt
+// Comments toevoegen en zien
+// Code update, comments toevoegen, PHP Documentatie
+
 ?>
 
 <!DOCTYPE HTML>
@@ -122,7 +128,7 @@ if (isset($_GET['logout'])) {
 
                             <!-- Profile -->
                             <li class="list-inline-item ml-2 align-middle">
-                                <a href="user/profile.php" class="link-menu">
+                                <a href="user/profile.php?userid=<?= $_SESSION['user_id'] ?>" class="link-menu">
                                     <div class="rounded-circle overflow-hidden d-flex justify-content-center align-items-center border navbar-profile-photo">
                                         <img src="images/avatar.png" alt="Avatar" style="transform: scale(1.5); width: 100%; position: absolute; left: 0;">
                                     </div>

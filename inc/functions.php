@@ -122,50 +122,53 @@ function getAllPosts(PDO $connection): array {
     return $posts;
 }
 
-function getAllPostsFromUser(PDO $connection, int $userId): array {
-    $posts = [];
+/**
+ * Get the profile posts and name from the user
+ *
+ * @param PDO $connection Instance of PDO connection object
+ * @param int $userId User ID
+ * @return array Returns a array containing information about the users profile
+ */
+function getProfilePostsAndName(PDO $connection, int $userId): array {
+    $profilePosts = [];
 
     try {
-
-        // TODO: Be specificity which values to get
-        $query = 'SELECT * FROM posts WHERE user_id = :user_id';
+        // Return post_id, image_path, likes, comments_total, user_id, username
+        $query = 'SELECT `posts`.`post_id`, `posts`.`image_path`,  `posts`.`likes`, `posts`.`comments_total`, `posts`.`user_id`, `users`.`username` FROM `posts` 
+	                LEFT JOIN `users` ON `posts`.`user_id` = `users`.`user_id` WHERE `users`.`user_id` = :userId';
         $preparedStatement = $connection -> prepare($query);
-        $preparedStatement -> bindParam(':user_id', $userId);
+        $preparedStatement -> bindParam(':userId', $userId);
         $preparedStatement -> execute();
 
         // Put them in an array
         while ($row = $preparedStatement -> fetch(PDO::FETCH_ASSOC)) {
-            $posts[] = $row;
+            $profilePosts[] = $row;
         }
 
     } catch (PDOException $exception) {
         echo sprintf("Something went wrong when trying to get posts: %s", htmlspecialchars($exception->getMessage()));
     }
 
-    return $posts;
+    return $profilePosts;
 }
 
-function getProfileDetails(PDO $connection, int $userId): array {
-    $details = [];
+function getProfileName(PDO $connection, int $userId): array {
+    $profileName = [];
 
     try {
 
-        // TODO: Be specificity which values to get
-        $query = 'SELECT * FROM users WHERE user_id = :user_id';
+        $query = 'SELECT username FROM users WHERE user_id = :userId';
         $preparedStatement = $connection -> prepare($query);
-        $preparedStatement -> bindParam(':user_id', $userId);
+        $preparedStatement -> bindParam(':userId', $userId);
         $preparedStatement -> execute();
 
-        // Put them in an array
-        while ($row = $preparedStatement -> fetch(PDO::FETCH_ASSOC)) {
-            $details[] = $row;
-        }
+        return $profileName = $row = $preparedStatement -> fetch(PDO::FETCH_ASSOC);
 
     } catch (PDOException $exception) {
-        echo sprintf("Something went wrong when trying to get posts: %s", htmlspecialchars($exception->getMessage()));
+        echo sprintf("Something went wrong when trying to get the profile name: %s", htmlspecialchars($exception->getMessage()));
     }
 
-    return $details;
+    return $profileName;
 }
 
 /**
@@ -374,9 +377,115 @@ function makeUserDirectory(string $dirName): void {
     return $output;
 }
 
-function followUser(PDO $connection, int $userIdMe, int $userToFollowId) {
+/**
+ * Insert the following people in the database
+ *
+ * @param PDO $connection Instance of PDO connection object
+ * @param int $userIdMe User ID from the session
+ * @param int $userToFollowId User ID from the URL
+ * @return bool Return TRUE if the insert was successful otherise FALSE
+ */
+function followUser(PDO $connection, int $userIdMe, int $userToFollowId): bool {
+    try {
+        $query = 'INSERT INTO `profile` (`user_me_id`, `user_follower_id`) VALUES (:userIdMe , :userToFollowId)';
+        $preparedStatement = $connection->prepare($query);
+        $preparedStatement -> bindParam(':userIdMe', $userIdMe);
+        $preparedStatement -> bindParam(':userToFollowId', $userToFollowId);
+        $preparedStatement -> execute();
 
+        return true;
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when try to follow the other user: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    return false;
 }
+
+/**
+ * Get the following count
+ *
+ * @param PDO $connection Instance of PDO connection object
+ * @param int $userIdMe User ID from the session
+ * @return int Return the amount of people who the user is following
+ */
+function getFollowingCount(PDO $connection, int $userIdMe): int {
+    try {
+        $query = 'SELECT DISTINCT COUNT(`user_me_id`) FROM `profile` WHERE user_me_id = :userIdMe';
+        $preparedStatement = $connection->prepare($query);
+        $preparedStatement -> bindParam(':userIdMe', $userIdMe);
+        $preparedStatement -> execute();
+
+        $row = $preparedStatement -> fetch(PDO::FETCH_ASSOC);
+
+        foreach ($row as $value) {
+            $following = $value;
+        }
+
+        return $following;
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when try to get following count: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    return -1;
+}
+
+/**
+ * Get the follower count
+ *
+ * @param PDO $connection Instance of PDO connection object
+ * @param int $userIdMe User ID from the session
+ * @return int Return the amount of people who follows the user
+ */
+function getFollowersCount(PDO $connection, int $userIdMe): int {
+    try {
+        $query = 'SELECT DISTINCT COUNT(`user_follower_id`) FROM `profile` WHERE user_follower_id = :userIdMe';
+        $preparedStatement = $connection->prepare($query);
+        $preparedStatement -> bindParam(':userIdMe', $userIdMe);
+        $preparedStatement -> execute();
+
+        $row = $preparedStatement -> fetch(PDO::FETCH_ASSOC);
+
+        foreach ($row as $value) {
+            $following = $value;
+        }
+
+        return $following;
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when try to get follower count: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    return -1;
+}
+
+/**
+ * Get the post upload count
+ *
+ * @param PDO $connection Instance of PDO connection object
+ * @param int $userIdMe User ID from the session
+ * @return int Return the amount of posts uploaded by the user
+ */
+function getPostUploadedCount(PDO $connection, int $userIdMe): int {
+    try {
+        $query = 'SELECT DISTINCT COUNT(`user_id`) FROM posts WHERE user_id = :userIdMe';
+        $preparedStatement = $connection->prepare($query);
+        $preparedStatement -> bindParam(':userIdMe', $userIdMe);
+        $preparedStatement -> execute();
+
+        $row = $preparedStatement -> fetch(PDO::FETCH_ASSOC);
+
+        foreach ($row as $value) {
+            $following = $value;
+        }
+
+        return $following;
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when try to get the post count: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    return -1;
+}
+
+
 
 function logout(): void {
     if (isset($_GET['logout'])) {

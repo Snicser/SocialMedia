@@ -25,19 +25,18 @@ if (empty($userName) || empty($userId)) {
     exit; // Make sure the code stops here
 }
 
-
+// Check if user id is set in URL bar
 if (isset($_GET['userid'])) {
 
+    // Get the user id from the URL bar
     $URL_USER_ID = $_GET['userid'] ?? 0;
-    $profileDetails = getProfileDetails($connection, $URL_USER_ID);
 
-    print_r($profileDetails);
+    // Get profile name and also set into the session
+    $profileName = getProfileName($connection, $URL_USER_ID);
+    if (empty($profileName)) die("No profile found!");
 
-    if (empty($profileDetails)) {
-        die("Something went wrong....");
-    }
-
-    $userName = $profileDetails[0]["username"];
+    $userName = $profileName['username'];
+    $_SESSION['username'] = $userName;
 }
 
 
@@ -101,9 +100,9 @@ if (isset($_GET['userid'])) {
             <div class="profile-stats">
 
                 <ul>
-                    <li><span class="profile-stat-count">164</span> posts</li>
-                    <li><span class="profile-stat-count">188</span> followers</li>
-                    <li><span class="profile-stat-count">206</span> following</li>
+                    <li><span class="profile-stat-count"><?= $postUploadedCount = getPostUploadedCount($connection, $URL_USER_ID); ?></span> posts</li>
+                    <li><span class="profile-stat-count"><?= $followersCount = getFollowersCount($connection, $URL_USER_ID); ?></span> followers</li>
+                    <li><span class="profile-stat-count"><?= $followingCount = getFollowingCount($connection, $URL_USER_ID); ?></span> following</li>
                 </ul>
 
             </div>
@@ -123,7 +122,7 @@ if (isset($_GET['userid'])) {
 
         <div class="gallery">
 
-            <!-- Load all the posts -->
+            <!-- Load the posts -->
             <?php
 
             // Check connection
@@ -133,17 +132,19 @@ if (isset($_GET['userid'])) {
                 exit;
             }
 
-            $posts = getAllPostsFromUser($connection, $userId);
+            $posts = getProfilePostsAndName($connection, $URL_USER_ID);
 
             if (empty($posts)) {
                 echo 'No posts found!';
             }
 
+
+
             foreach ($posts as $post) {
                 ?>
 
                 <div class="gallery-item" tabindex="0">
-                    <img src="image.php?image=<?= $post['image_path'] ?>&userid=<?= $userId ?>&username=<?= $userName ?>"  class="gallery-image" alt="Photo">
+                    <img src="image.php?image=<?= $post['image_path'] ?>&userid=<?= $URL_USER_ID ?>&username=<?=  $post['username']?>"  class="gallery-image" alt="Photo">
 
 
                     <div class="gallery-item-info">
@@ -153,8 +154,6 @@ if (isset($_GET['userid'])) {
                         </ul>
                     </div>
                 </div>
-
-
                 <?php
             }
 

@@ -115,29 +115,6 @@ logout();
                     </div>
                 </div>
 
-                <!-- User stats -->
-                <h5 class="text-center pb-3 pt-3 welcome-text-secondary">
-                    Gebruikers statistieken
-                </h5>
-                <div class="space-line-horizontal line"></div>
-                <div class="d-flex flex-row">
-                    <div class="p-2">
-                        <div class="d-flex flex-column">
-                            <div class="pl-2 pt-2 user-information-title">Statistieken</div>
-                            <div
-                                onclick="app.loadPage('statistics.html')"
-                                class="pl-2 user-information"
-                            >
-                                <span class="user-firstname">Laad de statistieken zien</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-2 user-information">
-                        <div class="d-flex flex-column"></div>
-                    </div>
-                </div>
-
-
             </div>
         </section>
     </main>
