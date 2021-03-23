@@ -1,3 +1,36 @@
+<?php
+
+// Get the stuff we need
+require_once 'inc/database.php';
+require_once 'inc/functions.php';
+require_once 'Utils/Constants.php';
+
+
+// Check if the user is logged in
+if ((!isset($_SESSION['logged-in-user'])) || (!isset($_SESSION['user_id'])) || empty($_SESSION['logged-in-user']) || empty($_SESSION['user_id'])) {
+    header('Location: user/login.php', true, 303);
+}
+
+if (isset($_GET['logout'])) {
+
+    switch ($_GET['logout']) {
+        case Constants::LOGOUT_SUCCESS:
+            unset($_SESSION['logged-in-user']);
+            unset($_SESSION['user_id']);
+            header('Location: user/login.php', true, 303);
+            break;
+        default:
+            echo 'Er ging iets fout!';
+            break;
+    }
+}
+
+// TODO
+// Comments toevoegen en zien
+// Code update, comments toevoegen, PHP Documentatie
+
+?>
+
 <!DOCTYPE HTML>
 <html lang="nl">
 <head>
@@ -14,13 +47,19 @@
 </head>
 <body>
 
-    <!--
+    <div class="container">
+        <form action="user/upload.php" method="POST" enctype="multipart/form-data">
+            <h4>Select image to upload:</h4>
+            <input type="file" name="user-file" id="fileToUpload">
 
-    Voor elke gebruiker een eigen directory aanmaken bij registeren
+            <div class="form-floating">
+                <textarea class="form-control" name="caption" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"></textarea>
+                <label for="floatingTextarea2">Comments</label>
+            </div>
 
-    Darkmode en color style opslaan in localStorages
-
-    -->
+            <button type="submit" name="post-message">Post</button>
+        </form>
+    </div>
 
     <header>
         <nav class="navbar navbar-expand-lg navbar-light navigation">
@@ -81,10 +120,17 @@
 
                             <!-- Profile -->
                             <li class="list-inline-item ml-2 align-middle">
-                                <a href="user/profile.php" class="link-menu">
+                                <a href="user/profile.php?userid=<?= $_SESSION['user_id'] ?>" class="link-menu">
                                     <div class="rounded-circle overflow-hidden d-flex justify-content-center align-items-center border navbar-profile-photo">
                                         <img src="images/avatar.png" alt="Avatar" style="transform: scale(1.5); width: 100%; position: absolute; left: 0;">
                                     </div>
+                                </a>
+                            </li>
+
+                            <!-- Logout -->
+                            <li class="list-inline-item ml-2">
+                                <a href="index.php?logout=true" class="link-menu">
+                                    Uitloggen
                                 </a>
                             </li>
                         </ul>
@@ -104,83 +150,52 @@
 
                     <div class="col">
 
-                        <div class="pt-4">
-                            <article class="card mx-auto">
-                                <div class="card-header">
-                                    <img src="images/avatar.png" alt="Avatar" class="avatar"><a href="#"><strong>Flavio</strong></a>
+                        <?php
+
+                        // Check connection
+                        $connection = getDatabaseConnection();
+                        if (!$connection) {
+                            header($_SERVER["SERVER_PROTOCOL"], true, 503);
+                            exit;
+                        }
+
+                        $posts = getPostFromFollowingUsers($connection, $_SESSION['user_id']);
+
+                        $posts;
+
+                        if (empty($posts)) {
+                            echo 'No posts found!';
+                        }
+
+
+                        foreach ($posts as $post) {
+                            ?>
+                                <div class="pt-4">
+                                    <article class="card mx-auto">
+                                        <div class="card-header">
+                                            <img src="images/avatar.png" alt="Avatar" class="avatar"><a href="user/profile.php?userid=<?= $post['user_id'] ?>"><strong><?= $post['username'] ?></strong></a>
+                                        </div>
+
+                                        <img src="user/image.php?image=<?= $post['image_path'] ?>&userid=<?= $post['user_id'] ?>&username=<?=  $post['username']?>" class="post-image" alt="Photo">
+
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <img src="images/avatar.png" alt="Avatar" class="avatar avatar-body"><span><small>Gelikte door <strong><?= $post['likes'] ?></strong> andere</small></span>
+                                                <i class="far fa-heart"></i>
+                                            </h6>
+                                            <p class="card-text"><?= $post['caption'] ?></p>
+                                            <p class="card-text"><small class="text-muted">Last update <?= $post['upload_date'] ?></small></p>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <a href="#" class="btn btn-primary">Add comment</a>
+                                            <label for="place-comment"><input type="text" id="place-comment" name="place-comment"></label>
+                                        </div>
+                                    </article>
                                 </div>
+                                <?php
+                        }
 
-                                <img src="images/content.jpg" class="post-image" alt="Photo">
-
-                                <div class="card-body">
-                                    <h6 class="card-title">
-                                        <img src="images/avatar.png" alt="Avatar" class="avatar avatar-body"><span><small>Gelikte door <strong>90</strong> andere</small></span>
-                                    </h6>
-                                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-                                </div>
-                                <div class="card-footer bg-transparent">
-                                    <a href="#" class="btn btn-primary">Add comment</a>
-                                </div>
-                            </article>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="row">
-
-                    <div class="col">
-
-                        <div class="pt-4">
-                            <article class="card mx-auto">
-                                <div class="card-header">
-                                    <img src="images/avatar.png" alt="Avatar" class="avatar"><a href="#"><strong>Flavio</strong></a>
-                                </div>
-
-                                <img src="images/content.jpg" class="post-image" alt="Photo">
-
-                                <div class="card-body">
-                                    <h6 class="card-title">
-                                        <img src="images/avatar.png" alt="Avatar" class="avatar avatar-body"><span><small>Gelikte door <strong>90</strong> andere</small></span>
-                                    </h6>
-                                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-                                </div>
-                                <div class="card-footer bg-transparent border-success">
-                                    <a href="#" class="btn btn-primary">Add comment</a>
-                                </div>
-                            </article>
-                        </div>
-
-                    </div>
-                </div>
-
-
-                <div class="row">
-
-                    <div class="col">
-
-                        <div class="pt-4">
-                            <article class="card mx-auto">
-                                <div class="card-header">
-                                    <img src="images/avatar.png" alt="Avatar" class="avatar"><a href="#"><strong>Flavio</strong></a>
-                                </div>
-
-                                <img src="images/content.jpg" class="post-image" alt="Photo">
-
-                                <div class="card-body">
-                                    <h6 class="card-title">
-                                        <img src="images/avatar.png" alt="Avatar" class="avatar avatar-body"><span><small>Gelikte door <strong>90</strong> andere</small></span>
-                                    </h6>
-                                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-                                </div>
-                                <div class="card-footer bg-transparent border-success">
-                                    <a href="#" class="btn btn-primary">Add comment</a>
-                                </div>
-                            </article>
-                        </div>
+                        ?>
 
                     </div>
                 </div>

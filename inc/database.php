@@ -3,8 +3,6 @@
 // Get the stuff we need
 require_once('credentials.php');
 
-define("DBNAME", "socialmedia");
-
 /**
  * Creates a database connection instance
  *
@@ -20,7 +18,7 @@ function getDatabaseConnection(): ?PDO {
         $connection = new PDO('mysql:host=' . HOST . ';dbname=' . DBNAME, USER, PASSWORD);
         $connection -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     } catch (PDOException $exception) {
-        echo $exception -> getMessage();
+        echo sprintf("Connection failed: %s", htmlspecialchars($exception->getMessage()));
     }
 
     return $connection;
