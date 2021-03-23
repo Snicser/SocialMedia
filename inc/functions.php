@@ -20,20 +20,21 @@ session_start();
  * @param int $isAdmin
  * @return bool
  */
-function registerUser($connection, string $firstName, string $lastName, string $email, string $password, string $birthday, string $gender, int $isAdmin): bool {
+function registerUser(PDO $connection, string $firstName, string $lastName, string $email, string $password, string $birthday, string $gender, int $isAdmin): bool {
     try {
         $query = "INSERT INTO `users` (`first_name`, `last_name`, `email`, `password`, `birthday`, `gender`, `username`, `is_admin`) 
                 VALUES (:first_name, :last_name, :email, :password, :birthday, :gender, :username, :is_admin);";
 
+        $lowerCaseUsername = strtolower($firstName);
         $preparedStatement = $connection -> prepare($query);
-        $preparedStatement -> bindParam(':first_name', $firstName, PDO::PARAM_STR);
-        $preparedStatement -> bindParam(':last_name', $lastName, PDO::PARAM_STR);
-        $preparedStatement -> bindParam(':email', $email, PDO::PARAM_STR);
-        $preparedStatement -> bindParam(':password', $password, PDO::PARAM_STR);
-        $preparedStatement -> bindParam(':birthday', $birthday, PDO::PARAM_STR);
-        $preparedStatement -> bindParam(':gender', $gender, PDO::PARAM_STR);
-        $preparedStatement -> bindParam(':username', strtolower($firstName), PDO::PARAM_STR);
-        $preparedStatement -> bindParam(':is_admin', $isAdmin, PDO::PARAM_INT);
+        $preparedStatement -> bindParam(':first_name', $firstName);
+        $preparedStatement -> bindParam(':last_name', $lastName);
+        $preparedStatement -> bindParam(':email', $email);
+        $preparedStatement -> bindParam(':password', $password);
+        $preparedStatement -> bindParam(':birthday', $birthday);
+        $preparedStatement -> bindParam(':gender', $gender);
+        $preparedStatement -> bindParam(':username', $lowerCaseUsername);
+        $preparedStatement -> bindParam(':is_admin', $isAdmin);
         $preparedStatement -> execute();
 
         return true;
@@ -44,14 +45,15 @@ function registerUser($connection, string $firstName, string $lastName, string $
     return false;
 }
 
-function addUserProfile($connection): void {
+function addUserProfile(PDO $connection): void {
     try {
         $query = "INSERT INTO `profile` (`user_me_id`, `user_follower_id`) VALUES (:user_me_id, :user_follower_id);";
         $preparedStatement = $connection -> prepare($query);
-        $preparedStatement -> bindParam(":user_me_id", 1);
-        $preparedStatement -> bindParam(":user_follower_id", 1);
+        $i = 1; // TODO: Make this beter
+        $preparedStatement -> bindParam(":user_me_id", $i);
+        $preparedStatement -> bindParam(":user_follower_id", $i);
     } catch (PDOException $exception) {
-        echo $exception -> getMessage();
+        echo sprintf("Something went wrong when trying to add the user to the database: %s", htmlspecialchars($exception->getMessage()));
     }
 }
 
@@ -74,26 +76,96 @@ function addUserProfile($connection): void {
  * The ID of the user
  * @return bool Return TRUE if the insert was successful otherwise FALSE
  */
-function uploadPost($connection, string $image, string $caption, int $likes, int $comments, string $uploadDate, int $userId): bool {
+function uploadPost(PDO $connection, string $image, string $caption, int $likes, int $comments, string $uploadDate, int $userId): bool {
     try {
         $query = 'INSERT INTO `posts`(`image_path`, `caption`, `likes`, `comments_total`, `upload_date`, `user_id`)
                     VALUES (:image, :caption, :likes, :comments, :uploadDate, :userId)';
 
         $preparedStatement = $connection -> prepare($query);
-        $preparedStatement -> bindParam(':image', $image, PDO::PARAM_STR);
-        $preparedStatement -> bindParam(':caption', $caption, PDO::PARAM_STR);
-        $preparedStatement -> bindParam(':likes', $likes, PDO::PARAM_INT);
-        $preparedStatement -> bindParam(':comments', $comments, PDO::PARAM_INT);
-        $preparedStatement -> bindParam(':uploadDate', $uploadDate, PDO::PARAM_STR);
-        $preparedStatement -> bindParam(':userId', $userId, PDO::PARAM_STR);
+        $preparedStatement -> bindParam(':image', $image);
+        $preparedStatement -> bindParam(':caption', $caption);
+        $preparedStatement -> bindParam(':likes', $likes);
+        $preparedStatement -> bindParam(':comments', $comments);
+        $preparedStatement -> bindParam(':uploadDate', $uploadDate);
+        $preparedStatement -> bindParam(':userId', $userId);
         $preparedStatement -> execute();
 
         return true;
     } catch (PDOException $exception) {
-        echo $exception -> getMessage();
+        echo sprintf("Something went wrong when trying to add the user to the database: %s", htmlspecialchars($exception->getMessage()));
     }
 
     return false;
+}
+
+
+function getAllPosts(PDO $connection): array {
+    $posts = [];
+
+    try {
+
+        // TODO: Be specificity which values to get
+        $query = 'SELECT `posts`.*, `users`.`username` FROM `posts` 
+	                LEFT JOIN `users` ON `posts`.`user_id` = `users`.`user_id`';
+        $preparedStatement = $connection -> prepare($query);
+        $preparedStatement -> execute();
+
+        // Put them in an array
+        while ($row = $preparedStatement -> fetch(PDO::FETCH_ASSOC)) {
+            $posts[] = $row;
+        }
+
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when trying to get posts: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    return $posts;
+}
+
+function getAllPostsFromUser(PDO $connection, int $userId): array {
+    $posts = [];
+
+    try {
+
+        // TODO: Be specificity which values to get
+        $query = 'SELECT * FROM posts WHERE user_id = :user_id';
+        $preparedStatement = $connection -> prepare($query);
+        $preparedStatement -> bindParam(':user_id', $userId);
+        $preparedStatement -> execute();
+
+        // Put them in an array
+        while ($row = $preparedStatement -> fetch(PDO::FETCH_ASSOC)) {
+            $posts[] = $row;
+        }
+
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when trying to get posts: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    return $posts;
+}
+
+function getProfileDetails(PDO $connection, int $userId): array {
+    $details = [];
+
+    try {
+
+        // TODO: Be specificity which values to get
+        $query = 'SELECT * FROM users WHERE user_id = :user_id';
+        $preparedStatement = $connection -> prepare($query);
+        $preparedStatement -> bindParam(':user_id', $userId);
+        $preparedStatement -> execute();
+
+        // Put them in an array
+        while ($row = $preparedStatement -> fetch(PDO::FETCH_ASSOC)) {
+            $details[] = $row;
+        }
+
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when trying to get posts: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    return $details;
 }
 
 /**
@@ -103,7 +175,7 @@ function uploadPost($connection, string $image, string $caption, int $likes, int
  * @return bool|string|null Returns the hashed password, or FALSE on failure, or null if the algorithm is invalid
  *
  */
-function hashPassword($password): bool|string|null {
+function hashPassword(string $password): bool|string|null {
     return password_hash($password, PASSWORD_DEFAULT, ["options" => 10]);
 }
 
@@ -119,7 +191,7 @@ function hashPassword($password): bool|string|null {
  * The user's entered username
  * @return bool Returns TRUE if password is correct or FALSE if it is not
  */
-function checkUserPassword($connection, $password, $username): bool {
+function checkUserPassword(PDO $connection, string $password, string $username): bool {
     // TODO REMEMBER ME CHECKBOX IS CHECKED
 
     /*
@@ -137,7 +209,7 @@ function checkUserPassword($connection, $password, $username): bool {
         // Get the user credentials from the database
         $query = "SELECT password, user_id FROM `users` WHERE username = :username";
         $preparedStatement = $connection -> prepare($query);
-        $preparedStatement -> bindParam(':username', $username, PDO::PARAM_STR);
+        $preparedStatement -> bindParam(':username', $username);
         $preparedStatement -> execute();
 
         // Put them in an array
@@ -160,7 +232,8 @@ function checkUserPassword($connection, $password, $username): bool {
     }
 
     // Check if they match
-    if (password_verify('Onderbroek10!', '$2y$10$IorgahAAZCtdSOHnV8deaeImn2MJFl8SkKjh1OW6vIKTHZe/R8Mxa')) {
+    if (password_verify($password, $userPassword)) {
+        $_SESSION['logged-in-user'] = true;
         return true;
     }
 
@@ -173,7 +246,7 @@ function checkUserPassword($connection, $password, $username): bool {
  * @param $dirName
  * Directory name for creating new directory
  */
-function makeUserDirectory($dirName): void {
+function makeUserDirectory(string $dirName): void {
     mkdir('../../../../../social-media-uploads/' . strtolower($dirName), 0777, true);
 }
 
@@ -183,7 +256,7 @@ function makeUserDirectory($dirName): void {
  * @param $email User's entered email address
  * @return bool Returns TRUE if email is valid or FALSE if it is not a valid email address
  */
-#[Pure] function isValidEmail($email): bool {
+#[Pure] function isValidEmail(string $email): bool {
     // Remove all illegal characters from email
     $email = filter_var($email, FILTER_SANITIZE_EMAIL);
 
@@ -195,13 +268,42 @@ function makeUserDirectory($dirName): void {
     return false;
 }
 
-#[ArrayShape(['error' => "null"])] function uploadFile($file): array {
+#[ArrayShape(['error' => "null"])] function uploadFile(PDO $connection, string $file): array {
 
     $output = ['error' => null];
+    $row = '';
+
+    try {
+        // Get the username
+        $userId = $_SESSION['user_id'];
+        if (empty($userId)) {
+            $output['error'][] = "Er ging iets fout met een gebruikers ID.";
+            return $output;
+        }
+
+        $query = "SELECT username FROM `users` WHERE user_id = :user_id";
+        $preparedStatement = $connection -> prepare($query);
+        $preparedStatement -> bindParam(':user_id', $userId);
+        $preparedStatement -> execute();
+
+        // Put the username in the $row variable
+        $row = $preparedStatement -> fetch(PDO::FETCH_ASSOC);
+
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when trying to get the username: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    if (empty($row)) {
+        $output['error'][] = "Er ging is een onbekende fout opgetreden.";
+        return $output;
+    }
+
+    // Set username into the session
+    $_SESSION['username'] = $row['username'];
 
     //Set file upload path
-    $PATH = '../../../../../social-media-uploads/';
-    $TARGET_FILE = $PATH . basename($_FILES[$file]["name"]);
+    $PATH = '../../../../../social-media-uploads/' . $row['username'];
+    $TARGET_FILE = $PATH . '/' . basename($_FILES[$file]["name"]);
 
     //Set max file size in bytes
     $MAX_UPLOAD_SIZE = 8000000;
@@ -270,5 +372,25 @@ function makeUserDirectory($dirName): void {
     }
 
     return $output;
+}
+
+function followUser(PDO $connection, int $userIdMe, int $userToFollowId) {
+
+}
+
+function logout(): void {
+    if (isset($_GET['logout'])) {
+
+        switch ($_GET['logout']) {
+            case Constants::LOGOUT_SUCCESS:
+                unset($_SESSION['logged-in-user']);
+                unset($_SESSION['user_id']);
+                header('Location: ../user/login.php', true, 303);
+                break;
+            default:
+                echo 'Er ging iets fout!';
+                break;
+        }
+    }
 }
 

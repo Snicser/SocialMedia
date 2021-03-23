@@ -1,3 +1,17 @@
+<?php
+
+require_once ('../inc/functions.php');
+
+
+// Check if the user is logged in
+if ((!isset($_SESSION['logged-in-user'])) || (!isset($_SESSION['user_id'])) || empty($_SESSION['logged-in-user']) || empty($_SESSION['user_id'])) {
+    header('Location: user/login.php', true, 303);
+}
+
+logout();
+
+?>
+
 <!DOCTYPE HTML>
 <html lang="nl">
 <head>
@@ -6,14 +20,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" type="text/css" href="../../css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="../../css/style.css">
-    <link rel="stylesheet" type="text/css" href="../../css/settings.css">
+    <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
+    <link rel="stylesheet" type="text/css" href="../css/settings.css">
 
 </head>
 <body>
-
-    <!-- Header include -->
 
     <main>
         <section>
@@ -126,12 +138,14 @@
                 </div>
 
 
-                <!-- Login INFO -->
-                <footer>
-                    <p class="logout my-2" onclick="app.logout()">Uitloggen</p>
-                </footer>
             </div>
         </section>
     </main>
+
+    <footer>
+        <a href="settings.php?logout=true" class="logout my-2">
+            Uitloggen
+        </a>
+    </footer>
 </body>
 </html>

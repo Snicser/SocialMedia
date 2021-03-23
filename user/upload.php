@@ -7,9 +7,6 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     exit;
 }
 
-// Start or continue a session
-session_start();
-
 // Get the stuff we need
 require_once ('../inc/database.php');
 require_once ('../inc/functions.php');
@@ -32,14 +29,16 @@ if (isset($_POST['post-message'])) {
 
     // Check
     $caption = $_POST['caption'] ?? '-';
-    $file = uploadFile('user-file');
+    $file = uploadFile($connection, 'user-file');
     $imageName = '';
+
 
     // Check if there was error if so, send a header with information
     if (is_array($file['error'])) {
         $errorMessage = join('&error=', $file['error']);
         $errorMessageURLEncoded = urlencode($errorMessage);
         header('Location: ../index.php?post=failed&error=' . $errorMessageURLEncoded , true, 303);
+        exit;
     }
 
     if (is_array($file['name'])) {
@@ -50,6 +49,7 @@ if (isset($_POST['post-message'])) {
 
     if(!isset($_SESSION['user_id'])) {
         header('Location: ../index.php?post=failed&error=userid', true, 303);
+        exit;
     }
 
     // Get date time and format to string
@@ -61,6 +61,7 @@ if (isset($_POST['post-message'])) {
 
     if (!uploadPost($connection, $imageName, $caption, 0, 0, $dateTime, $userId)) {
         header('Location: ../index.php?post=failed&error=server', true, 303);
+        exit;
     }
 
     header('Location: ../index.php?post=success', true, 303);

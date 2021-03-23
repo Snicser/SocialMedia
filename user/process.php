@@ -66,10 +66,10 @@ if (isset($_POST['login'])) {
         $username = $_POST['username'] ?? "Undefined";
         $password = $_POST['password'] ?? "Undefined";
 
-
         // Check user login
         if (checkUserPassword($connection, $password, $username)) {
             header("Location: ../index.php?login=success", true, 303);
+            exit;
         }
 
         header("Location: login.php?login=failed", true, 303);

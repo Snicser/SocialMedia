@@ -93,7 +93,7 @@ if (isset($_GET['login'])) {
                     <button class="btn btn-lg btn-login b-0" type="submit" name="login" id="login">Inloggen</button>
 
                     <div class="my-3">
-                        <a class="btn-go-back position-relative" href="../">Geen lid? <span>Registreer dan via hier!</span></a>
+                        <a class="btn-go-back position-relative" href="register.php">Geen lid? <span>Registreer dan via hier!</span></a>
                     </div>
                 </form>
             </div>
