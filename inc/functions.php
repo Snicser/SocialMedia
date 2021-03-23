@@ -98,22 +98,34 @@ function uploadPost(PDO $connection, string $image, string $caption, int $likes,
     return false;
 }
 
-
-function getAllPosts(PDO $connection): array {
+// View the post from all the following people
+function getPostFromFollowingUsers(PDO $connection, int $userId): array {
     $posts = [];
+    $followers = [];
 
     try {
+        $query = 'SELECT `user_follower_id` FROM `profile` WHERE `user_me_id` = :userIdMe';
+        $preparedStatement = $connection -> prepare($query);
+        $preparedStatement -> bindParam(':userIdMe', $userId);
+        $preparedStatement -> execute();
 
-        // TODO: Be specificity which values to get
+        while ($row = $preparedStatement -> fetchAll(PDO::FETCH_ASSOC)) {
+            $followers = $row; // Array wit 8 and 10
+        }
+
+
         $query = 'SELECT `posts`.*, `users`.`username` FROM `posts` 
-	                LEFT JOIN `users` ON `posts`.`user_id` = `users`.`user_id`';
+                LEFT JOIN `users` ON `posts`.`user_id` = `users`.`user_id` 
+            WHERE `posts`.`user_id` IN (' . implode(',', array_column($followers, 'user_follower_id')) . ')';
+
         $preparedStatement = $connection -> prepare($query);
         $preparedStatement -> execute();
 
-        // Put them in an array
-        while ($row = $preparedStatement -> fetch(PDO::FETCH_ASSOC)) {
-            $posts[] = $row;
+        while ($row = $preparedStatement -> fetchAll(PDO::FETCH_ASSOC)) {
+            $posts = $row; // Array with image path and followers
         }
+
+        return $posts;
 
     } catch (PDOException $exception) {
         echo sprintf("Something went wrong when trying to get posts: %s", htmlspecialchars($exception->getMessage()));
@@ -169,6 +181,43 @@ function getProfileName(PDO $connection, int $userId): array {
     }
 
     return $profileName;
+}
+
+function getUserInformation(PDO $connection, int $userId): array {
+    $userInformation = [];
+
+    try {
+        $query = 'SELECT `users`.`first_name`, `users`.`last_name`, `users`.`email` FROM `users` WHERE user_id = :userId';
+        $preparedStatement = $connection -> prepare($query);
+        $preparedStatement -> bindParam(':userId', $userId);
+        $preparedStatement -> execute();
+
+        while ($row = $preparedStatement -> fetch(PDO::FETCH_ASSOC)) {
+            $userInformation = $row;
+        }
+
+        return $userInformation;
+
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when trying to get your information: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    return $userInformation;
+}
+
+function updateProfileInformation(PDO $connection, int $userId, string $email): bool {
+    try {
+        $query = 'UPDATE `users` SET `email` = :email WHERE `users`.`user_id` = :userId';
+        $preparedStatement = $connection -> prepare($query);
+        $preparedStatement -> bindParam(':email', $email);
+        $preparedStatement -> bindParam(':userId', $userId);
+        $preparedStatement -> execute();
+        return true;
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when trying to update your profile: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    return false;
 }
 
 /**

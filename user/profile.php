@@ -86,7 +86,7 @@ if (isset($_GET['userid'])) {
                 }
 
                 if ($yourProfile) {
-                    echo '<a href="settings.php" class="btn profile-edit-btn">Edit Profile</a>';
+                    echo '<a href="settings.php?userid=' . $URL_USER_ID . '" class="btn profile-edit-btn">Edit Profile</a>';
                     echo '<button class="btn profile-settings-btn" aria-label="profile settings"><i class="fas fa-cog"></i></button>';
                 } else {
                     ?><a href="follow.php?userid=<?= $URL_USER_ID ?>" class="btn profile-edit-btn">Volgen</a><?php

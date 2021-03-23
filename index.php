@@ -26,8 +26,6 @@ if (isset($_GET['logout'])) {
 }
 
 // TODO
-// Profile email adres veranderen
-// Fotos zien van mensen die jij volgt
 // Comments toevoegen en zien
 // Code update, comments toevoegen, PHP Documentatie
 
@@ -49,15 +47,9 @@ if (isset($_GET['logout'])) {
 </head>
 <body>
 
-    <!--
-
-    Darkmode en color style opslaan in localStorages
-
-    -->
-
     <div class="container">
         <form action="user/upload.php" method="POST" enctype="multipart/form-data">
-            Select image to upload:
+            <h4>Select image to upload:</h4>
             <input type="file" name="user-file" id="fileToUpload">
 
             <div class="form-floating">
@@ -160,8 +152,6 @@ if (isset($_GET['logout'])) {
 
                         <?php
 
-                        print_r($_SESSION);
-
                         // Check connection
                         $connection = getDatabaseConnection();
                         if (!$connection) {
@@ -169,11 +159,14 @@ if (isset($_GET['logout'])) {
                             exit;
                         }
 
-                        $posts = getAllPosts($connection);
+                        $posts = getPostFromFollowingUsers($connection, $_SESSION['user_id']);
+
+                        $posts;
 
                         if (empty($posts)) {
                             echo 'No posts found!';
                         }
+
 
                         foreach ($posts as $post) {
                             ?>
@@ -183,8 +176,7 @@ if (isset($_GET['logout'])) {
                                             <img src="images/avatar.png" alt="Avatar" class="avatar"><a href="user/profile.php?userid=<?= $post['user_id'] ?>"><strong><?= $post['username'] ?></strong></a>
                                         </div>
 
-                                        <img src="user/image.php?image=<?= $post['image_path'] ?>" class="post-image" alt="Photo">
-
+                                        <img src="user/image.php?image=<?= $post['image_path'] ?>&userid=<?= $post['user_id'] ?>&username=<?=  $post['username']?>" class="post-image" alt="Photo">
 
                                         <div class="card-body">
                                             <h6 class="card-title">
