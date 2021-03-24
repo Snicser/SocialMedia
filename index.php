@@ -41,9 +41,13 @@ if (isset($_GET['logout'])) {
     <!-- Stylesheets -->
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/modal.css">
 
     <!-- Font awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous"/>
+
+    <!-- Modal -->
+    <script src="js/modal.js" defer></script>
 </head>
 <body>
 
@@ -53,8 +57,8 @@ if (isset($_GET['logout'])) {
             <input type="file" name="user-file" id="fileToUpload">
 
             <div class="form-floating">
-                <textarea class="form-control" name="caption" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"></textarea>
-                <label for="floatingTextarea2">Comments</label>
+                <textarea class="form-control" name="caption" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 75px"></textarea>
+                <label for="floatingTextarea2">Caption</label>
             </div>
 
             <button type="submit" name="post-message">Post</button>
@@ -187,8 +191,44 @@ if (isset($_GET['logout'])) {
                                             <p class="card-text"><small class="text-muted">Last update <?= $post['upload_date'] ?></small></p>
                                         </div>
                                         <div class="card-footer bg-transparent">
-                                            <a href="#" class="btn btn-primary">Add comment</a>
-                                            <label for="place-comment"><input type="text" id="place-comment" name="place-comment"></label>
+                                            <form action="user/process.php" method="POST">
+                                                <button class="btn btn-primary" type="submit" name="add-comment">Add comment</button>
+                                                <label for="place-comment-<?= $post['post_id']?>"><input type="text" id="place-comment-<?= $post['post_id']?>" name="comment"></label>
+                                                <input type="hidden" name="post-id" value="<?= $post['post_id'] ?>">
+                                            </form>
+
+                                            <form action="<?= htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post">
+                                                <input type="hidden" name="post-id" value="<?= $post['post_id'] ?>">
+                                                <input type="submit" name="check-comments" value="Zien">
+                                            </form>
+
+                                            <?php
+
+                                            // Check if submit button is clicked for login
+                                            if (isset($_POST['check-comments'])) {
+
+                                                $postId = $_POST['post-id'] ?? 0;
+
+
+                                                $comments = getCommentsFromPost($connection, $postId);
+
+                                                if (empty($comments)) {
+                                                    header("Location: ../index.php?commentsee=failed");
+                                                    exit;
+                                                }
+
+
+                                                foreach ($comments as $comment) {
+                                                    $userName = $comment['username'];
+                                                    $comment = $comment['comment'];
+
+                                                    echo '<div>Gebruiker: '.  $userName . ' zegt: ' . $comment . '</div>';
+                                                }
+
+                                            }
+
+                                            ?>
+
                                         </div>
                                     </article>
                                 </div>

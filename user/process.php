@@ -76,5 +76,27 @@ if (isset($_POST['login'])) {
     }
 }
 
+// Check if add comment button is clicked
+if (isset($_POST['add-comment'])) {
+
+    // Check if the form input is not empty
+    if (empty($_POST['comment']) || empty($_POST['post-id'])) {
+        header("Location: ../index.php?comment=failed&empty=true", true, 303);
+        exit;
+    } else {
+
+        $comment = $_POST['comment'] ?? "Undefined";
+        $postId = $_POST['post-id'] ?? 0;
+        $userId = $_SESSION['user_id'] ?? 0;
+
+        // Check user login
+        if (addComment($connection, $comment, 0, $userId, $postId)) {
+            header("Location: ../index.php?comment=success", true, 303);
+            exit;
+        }
+
+        header("Location: login.php?comment=failed", true, 303);
+    }
+}
 
 

@@ -534,6 +534,48 @@ function getPostUploadedCount(PDO $connection, int $userIdMe): int {
     return -1;
 }
 
+function addComment(PDO $connection, string $comment, $likes, $userId, $postId): bool {
+    try {
+        $query = 'INSERT INTO `comments` (`comment`, `comment_like`, `user_id`, `post_id`) VALUES (:comment, :likes, :userId, :postId)';
+        $preparedStatement = $connection -> prepare($query);
+        $preparedStatement -> bindParam(':comment', $comment);
+        $preparedStatement -> bindParam(':likes', $likes);
+        $preparedStatement -> bindParam(':userId', $userId);
+        $preparedStatement -> bindParam(':postId', $postId);
+        $preparedStatement->execute();
+
+        return true;
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when trying to add a comment: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    return false;
+}
+
+function getCommentsFromPost(PDO $connection, $postId): array {
+    $comments = [];
+
+    try {
+        $query = 'SELECT `comments`.*, `users`.`username` FROM `comments` 
+                    LEFT JOIN `users` ON `comments`.`user_id` = `users`.`user_id`
+                    WHERE `comments`.`post_id` = :postId';
+        $preparedStatement = $connection -> prepare($query);
+        $preparedStatement -> bindParam(':postId', $postId);
+        $preparedStatement->execute();
+
+        while ($row = $preparedStatement -> fetchAll(PDO::FETCH_ASSOC)) {
+            $comments = $row;
+        }
+
+        return $comments;
+
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when trying to get the comments: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    return $comments;
+}
+
 
 
 function logout(): void {
