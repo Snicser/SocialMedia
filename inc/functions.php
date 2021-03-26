@@ -113,6 +113,10 @@ function getPostFromFollowingUsers(PDO $connection, int $userId): array {
             $followers = $row; // Array wit 8 and 10
         }
 
+        if (empty($followers)) {
+            return $posts;
+        }
+
 
         $query = 'SELECT `posts`.*, `users`.`username` FROM `posts` 
                 LEFT JOIN `users` ON `posts`.`user_id` = `users`.`user_id` 
@@ -120,6 +124,7 @@ function getPostFromFollowingUsers(PDO $connection, int $userId): array {
 
         $preparedStatement = $connection -> prepare($query);
         $preparedStatement -> execute();
+
 
         while ($row = $preparedStatement -> fetchAll(PDO::FETCH_ASSOC)) {
             $posts = $row; // Array with image path and followers
@@ -576,6 +581,27 @@ function getCommentsFromPost(PDO $connection, $postId): array {
     return $comments;
 }
 
+function searchProfiles(PDO $connection, string $username): array {
+    $profiles = [];
+
+    try {
+        $query = 'SELECT user_id, username FROM `users` WHERE username = :username';
+        $preparedStatement = $connection -> prepare($query);
+        $preparedStatement -> bindParam(':username', $username);
+        $preparedStatement -> execute();
+
+        while ($row = $preparedStatement -> fetchAll(PDO::FETCH_ASSOC)) {
+            $profiles = $row;
+        }
+
+        return $profiles;
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when trying to get profiles: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    return $profiles;
+}
+
 
 
 function logout(): void {
@@ -583,9 +609,8 @@ function logout(): void {
 
         switch ($_GET['logout']) {
             case Constants::LOGOUT_SUCCESS:
-                unset($_SESSION['logged-in-user']);
-                unset($_SESSION['user_id']);
-                header('Location: ../user/login.php', true, 303);
+                unset($_SESSION);
+                header('Location: ../user/login.php?clear=true', true, 303);
                 break;
             default:
                 echo 'Er ging iets fout!';

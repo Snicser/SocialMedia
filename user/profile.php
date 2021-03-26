@@ -59,7 +59,9 @@ if (isset($_GET['userid'])) {
 
 <header>
 
-    <a href="../index.php">Go back</a>
+    <a class="btn btn-primary" href="../index.php" role="button" style="font-size: 14px">Ga terug</a>
+
+
 
     <div class="container">
 
@@ -135,17 +137,19 @@ if (isset($_GET['userid'])) {
             $posts = getProfilePostsAndName($connection, $URL_USER_ID);
 
             if (empty($posts)) {
-                echo 'No posts found!';
+                ?>
+                <div class="alert alert-warning no-posts-found" role="alert">
+                    Geen posts gevonden!
+                </div>
+                <?php
             }
 
 
 
             foreach ($posts as $post) {
                 ?>
-
                 <div class="gallery-item" tabindex="0">
                     <img src="image.php?image=<?= $post['image_path'] ?>&userid=<?= $URL_USER_ID ?>&username=<?=  $post['username']?>"  class="gallery-image" alt="Photo">
-
 
                     <div class="gallery-item-info">
                         <ul>
@@ -160,8 +164,6 @@ if (isset($_GET['userid'])) {
             ?>
 
         </div>
-
-        <div class="loader"></div>
     </div>
 
 

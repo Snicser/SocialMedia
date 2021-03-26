@@ -1,5 +1,6 @@
 <?php
 
+require_once ('../inc/functions.php');
 require_once ('../Utils/Constants.php');
 
 // TODO: Document this stuff
@@ -23,7 +24,19 @@ if (isset($_GET['login'])) {
     };
 }
 
+if (isset($_GET['clear'])) {
+    switch ($_GET['logout']) {
+        case Constants::LOGOUT_SUCCESS:
+            unset($_SESSION);
+            echo 'Je bent nu uitgelogd!';
+            break;
+        default:
+            echo 'Er ging iets fout!';
+            break;
+    }
+}
 
+print_r($_SESSION);
 ?>
 
 <!DOCTYPE HTML>
@@ -46,28 +59,6 @@ if (isset($_GET['login'])) {
             <h1>FlappiesMedia</h1>
         </div>
     </header>
-
-<!--    <main>-->
-<!--        <article>-->
-<!--            <section>-->
-<!--                <div class="container">-->
-<!---->
-<!--                    <div class="row">-->
-<!---->
-<!--                        <div class="col-6" style="border: 1px solid">-->
-<!--                            Item 1-->
-<!--                        </div>-->
-<!---->
-<!--                        <div class="col-6" style="border: 1px solid">-->
-<!--                            Item 2-->
-<!--                        </div>-->
-<!---->
-<!--                    </div>-->
-<!---->
-<!--                </div>-->
-<!--            </section>-->
-<!--        </article>-->
-<!--    </main>-->
 
     <main>
         <div class="container">

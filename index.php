@@ -26,9 +26,12 @@ if (isset($_GET['logout'])) {
 }
 
 // TODO
-// Comments toevoegen en zien
 // Code update, comments toevoegen, PHP Documentatie
 
+
+// TODO:
+// Bug -> Comment zie je onder elke post
+// Bug -> Profile gevonden allen zegt die gelijk ook de message dat niet geovonden is terwijl die wel is gevonden
 ?>
 
 <!DOCTYPE HTML>
@@ -47,21 +50,6 @@ if (isset($_GET['logout'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous"/>
 </head>
 <body>
-
-    <div class="container">
-        <form action="user/upload.php" method="POST" enctype="multipart/form-data">
-            <h4>Select image to upload:</h4>
-            <input type="file" name="user-file" id="fileToUpload">
-
-            <div class="form-floating">
-                <textarea class="form-control" name="caption" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 75px"></textarea>
-                <label for="floatingTextarea2">Caption</label>
-            </div>
-
-            <button type="submit" name="post-message">Post</button>
-        </form>
-    </div>
-
     <header>
         <nav class="navbar navbar-expand-lg navbar-light navigation">
             <div class="container justify-content-center">
@@ -72,13 +60,41 @@ if (isset($_GET['logout'])) {
                     </a>
 
                     <div>
-                        <form class="form-inline my-2 my-lg-0 position-relative search">
-                            <i class="fa fa-search position-absolute"></i>
-                            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                        <form class="form-inline my-2 my-lg-0 position-relative search" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST">
+                            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="search-username">
+                            <button type="submit" name="search-profile" class="position-absolute btn-search"><i class="fa fa-search"></i></button>
                         </form>
 
                         <?php
 
+                            // Check connection
+                            $connection = getDatabaseConnection();
+                            if (!$connection) {
+                                header($_SERVER["SERVER_PROTOCOL"], true, 503);
+                                exit;
+                            }
+
+                            if (isset($_POST['search-profile'])) {
+
+                                if (empty($_POST['search-username'])) {
+                                    header('Location: '.  htmlspecialchars($_SERVER["PHP_SELF"]), true, 303);
+                                    exit;
+                                }
+
+                                $searchUsername = $_POST['search-username'] ?? 'Undefined';
+
+                                $profiles = searchProfiles($connection, $searchUsername);
+
+                                if (empty($profile)) {
+                                    echo 'Geen profiel gevonden!';
+                                }
+
+                                foreach ($profiles as $profile) {
+                                    ?>
+                                    <a href="user/profile.php?userid=<?= $profile['user_id'] ?>">Profiel van <?= $profile['username'] ?></a>
+                                    <?php
+                                }
+                            }
                         ?>
                     </div>
 
@@ -147,6 +163,27 @@ if (isset($_GET['logout'])) {
     </header>
 
     <main>
+
+        <!-- Pos fixed float left top 0 left 20px -->
+        <section>
+            <div class="sticky-post-upload position-fixed">
+                <form action="user/upload.php" method="POST" enctype="multipart/form-data">
+                    <h4>Select image to upload:</h4>
+                    <input type="file" class="form-control mb-3 shadow-none border-none" name="user-file" id="fileToUpload" required="" style="border-color: #000">
+
+                    <div class="form-floating mb-3">
+                            <textarea class="form-control shadow-none" name="caption" id="floatingTextarea"
+                                      placeholder="Schrijf een bijschrift..." maxlength="200"
+                                      style="height: 100px;border-color: #000;resize:none;" required=""></textarea>
+                        <label for="floatingTextarea">Schrijf een bijschrift...</label>
+                    </div>
+
+                    <button type="submit" name="post-message" class="btn btn-post-upload shadow-none">Post uploaden</button>
+                </form>
+            </div>
+        </section>
+
+
         <section>
 
             <div class="container">
@@ -157,16 +194,7 @@ if (isset($_GET['logout'])) {
 
                         <?php
 
-                        // Check connection
-                        $connection = getDatabaseConnection();
-                        if (!$connection) {
-                            header($_SERVER["SERVER_PROTOCOL"], true, 503);
-                            exit;
-                        }
-
                         $posts = getPostFromFollowingUsers($connection, $_SESSION['user_id']);
-
-                        $posts;
 
                         if (empty($posts)) {
                             echo 'No posts found!';
@@ -184,13 +212,36 @@ if (isset($_GET['logout'])) {
                                         <img src="user/image.php?image=<?= $post['image_path'] ?>&userid=<?= $post['user_id'] ?>&username=<?=  $post['username']?>" class="post-image" alt="Photo">
 
                                         <div class="card-body">
+
                                             <h6 class="card-title">
                                                 <img src="images/avatar.png" alt="Avatar" class="avatar avatar-body"><span><small>Gelikte door <strong><?= $post['likes'] ?></strong> andere</small></span>
                                                 <i class="far fa-heart"></i>
                                             </h6>
+
                                             <p class="card-text"><?= $post['caption'] ?></p>
-                                            <p class="card-text"><small class="text-muted">Last update <?= $post['upload_date'] ?></small></p>
+                                            <p class="card-text"><small class="text-muted">Datum geupload:
+                                                    <?php
+
+                                                    // Calculate the upload date when the post was uploaded
+                                                    // After the calculation we can display the difference
+                                                    // So the users will know when the post was uploaded
+                                                    $date = $post['upload_date'] ?? 'No date set';
+
+                                                    try {
+                                                        $origin = new DateTime($post['upload_date']);
+                                                    } catch (Exception $e) {
+                                                        echo sprintf("Something went wrong when trying to calculate the upload date: %s", htmlspecialchars($exception->getMessage()));
+                                                    }
+
+                                                    $target = new DateTime();
+                                                    $interval = $origin -> diff($target);
+
+                                                    // We need to format to a string to display it to the user
+                                                    echo $interval -> format('%a dagen geleden');
+                                                    ?></small>
+                                            </p>
                                         </div>
+
                                         <div class="card-footer bg-transparent">
                                             <form action="user/process.php" method="POST">
                                                 <button class="btn btn-primary" type="submit" name="add-comment">Add comment</button>

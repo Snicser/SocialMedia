@@ -1,5 +1,5 @@
 :root {
-
+    --bg-color-main: rgb(250, 250, 250);
 }
 
 *, *::before, *::after {
@@ -9,7 +9,11 @@
 html, body {
     margin: 0;
     padding: 0;
-    background-color: rgb(250, 250, 250);
+    background-color: var(--bg-color-main);
+}
+
+a {
+    text-decoration: none;
 }
 
 /* Header / navigation styling */
@@ -37,6 +41,15 @@ html, body {
 .search input:active, .search input:focus {
     outline: none;
     box-shadow: none;
+    border-color: #000;
+}
+
+.btn-search {
+    top: 10%;
+    right: 2%;
+    outline: none;
+    background-color: var(--bs-white);
+    border: none;
 }
 
 /* Card style */
@@ -72,6 +85,14 @@ html, body {
     border-bottom: 1px solid rgba(0,0,0,.125);
 }
 
-/*.upload-file {*/
-/*    padding: 25px;*/
-/*}*/
+/* Styling for post upload */
+.sticky-post-upload {
+    left: 1%;
+    bottom: 7%;
+    padding: 0;
+}
+
+.btn-post-upload, .btn-post-upload:hover {
+    color: var(--bs-blue);
+    background-color: var(--bg-color-main);
+}
