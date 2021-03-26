@@ -113,6 +113,10 @@ function getPostFromFollowingUsers(PDO $connection, int $userId): array {
             $followers = $row; // Array wit 8 and 10
         }
 
+        if (empty($followers)) {
+            return $posts;
+        }
+
 
         $query = 'SELECT `posts`.*, `users`.`username` FROM `posts` 
                 LEFT JOIN `users` ON `posts`.`user_id` = `users`.`user_id` 
@@ -120,6 +124,7 @@ function getPostFromFollowingUsers(PDO $connection, int $userId): array {
 
         $preparedStatement = $connection -> prepare($query);
         $preparedStatement -> execute();
+
 
         while ($row = $preparedStatement -> fetchAll(PDO::FETCH_ASSOC)) {
             $posts = $row; // Array with image path and followers
@@ -534,6 +539,69 @@ function getPostUploadedCount(PDO $connection, int $userIdMe): int {
     return -1;
 }
 
+function addComment(PDO $connection, string $comment, $likes, $userId, $postId): bool {
+    try {
+        $query = 'INSERT INTO `comments` (`comment`, `comment_like`, `user_id`, `post_id`) VALUES (:comment, :likes, :userId, :postId)';
+        $preparedStatement = $connection -> prepare($query);
+        $preparedStatement -> bindParam(':comment', $comment);
+        $preparedStatement -> bindParam(':likes', $likes);
+        $preparedStatement -> bindParam(':userId', $userId);
+        $preparedStatement -> bindParam(':postId', $postId);
+        $preparedStatement->execute();
+
+        return true;
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when trying to add a comment: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    return false;
+}
+
+function getCommentsFromPost(PDO $connection, $postId): array {
+    $comments = [];
+
+    try {
+        $query = 'SELECT `comments`.*, `users`.`username` FROM `comments` 
+                    LEFT JOIN `users` ON `comments`.`user_id` = `users`.`user_id`
+                    WHERE `comments`.`post_id` = :postId';
+        $preparedStatement = $connection -> prepare($query);
+        $preparedStatement -> bindParam(':postId', $postId);
+        $preparedStatement->execute();
+
+        while ($row = $preparedStatement -> fetchAll(PDO::FETCH_ASSOC)) {
+            $comments = $row;
+        }
+
+        return $comments;
+
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when trying to get the comments: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    return $comments;
+}
+
+function searchProfiles(PDO $connection, string $username): array {
+    $profiles = [];
+
+    try {
+        $query = 'SELECT user_id, username FROM `users` WHERE username = :username';
+        $preparedStatement = $connection -> prepare($query);
+        $preparedStatement -> bindParam(':username', $username);
+        $preparedStatement -> execute();
+
+        while ($row = $preparedStatement -> fetchAll(PDO::FETCH_ASSOC)) {
+            $profiles = $row;
+        }
+
+        return $profiles;
+    } catch (PDOException $exception) {
+        echo sprintf("Something went wrong when trying to get profiles: %s", htmlspecialchars($exception->getMessage()));
+    }
+
+    return $profiles;
+}
+
 
 
 function logout(): void {
@@ -541,9 +609,8 @@ function logout(): void {
 
         switch ($_GET['logout']) {
             case Constants::LOGOUT_SUCCESS:
-                unset($_SESSION['logged-in-user']);
-                unset($_SESSION['user_id']);
-                header('Location: ../user/login.php', true, 303);
+                unset($_SESSION);
+                header('Location: ../user/login.php?clear=true', true, 303);
                 break;
             default:
                 echo 'Er ging iets fout!';
